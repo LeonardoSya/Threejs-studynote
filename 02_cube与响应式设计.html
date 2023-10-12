@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #c {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+
+</head>
+
+
+<body>
+    <canvas id="c"></canvas>
+</body>
+
+<script type="module">
+    import * as THREE from 'https://unpkg.com/three/build/three.module.js';
+
+    function main() {
+        // Three.js需要用这个canvas标签来绘制，因此要先获取canvas标签然后传给three.js
+        const canvas = document.querySelector('#c')
+        // 创建一个WebGL渲染器，负责将提供的所有数据渲染到canvas上
+        const renderer = new THREE.WebGLRenderer({ antialias: true, canvas })
+
+        // 透视摄像机
+        const fov = 75;  // 视野范围 垂直方向为75°
+        const aspect = window.innerWidth / window.innerHeight;  // 画布宽高比
+        const near = 1;  // 近平面
+        const far = 15;  // 远平面    它们限制了摄像机面朝方向的可绘区域，超出这个范围的物体将为被裁剪掉
+        const camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
+
+        camera.position.z = 5;
+
+        // 场景
+        const scene = new THREE.Scene();
+
+        // 包含盒子信息的立方几何体(BoxGeometry) 
+        // 几乎所有物体都需要一个包含了 组成三维物体的顶点信息 的几何体
+        const boxWidth = 1;
+        const boxHeight = 1;
+        const boxDepth = 1;
+        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+
+        // 材质和颜色
+        const material = new THREE.MeshPhongMaterial({ color: 0x00aeef })  // 此材质会受灯光影响
+
+        // 光照
+        // 平行光有一个位置和目标点，默认值均为(0,0,0)
+        {
+            const color = 0xffffff;
+            const intensity = 5;
+            const light = new THREE.DirectionalLight(color, intensity);
+            light.position.set(-1, 2, 4);   // 灯光位置(此处位于摄像机左上方)
+            scene.add(light);
+        }
+
+        // 网格对象， 包含几何体、材质、对象在场景中相对于其父对象的位置朝向和缩放
+        const cube = new THREE.Mesh(geometry, material);   // 父对象即为场景对象
+
+        // 网格添加到场景
+        scene.add(cube);
+
+        // 场景和摄像机传递给渲染器
+        renderer.render(scene, camera);
+
+
+        //  canvas的内部尺寸，它的【分辨率】称作【绘图缓冲区尺寸】，我们应该使canvas的绘图缓冲区与canvas的显示尺寸一样
+        // 这个函数检查渲染器的canvas和canvas的显示尺寸是否一样
+        function resizeRendererToDisplaySize(renderer) {
+            const canvas = renderer.domElement;
+            const pixelRatio = window.devicePixelRatio;
+            const width = canvas.clientWidth * pixelRatio | 0;
+            const height = canvas.clientHeight * pixelRatio | 0;
+            const needResize = canvas.width !== width || canvas.height !== height;
+            if (needResize) {
+                renderer.setSize(width, height, false)  // 第三个参数指定是否要更新渲染器样式, false表示样式将保持不变，只有画布的大小会被更新
+            }
+            return needResize;
+        }
+
+
+
+
+        // 渲染循环函数
+        function render(time) {
+
+            if (resizeRendererToDisplaySize(renderer)) {   // 只有canvas显示尺寸变化时宽高比才变化
+                // 解决拉伸问题,将相机的宽高比设置为canvas的宽高比
+                const canvas = renderer.domElement;   // canvas定义为渲染器中的画布，用以获取正确的宽高
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix();  // 这行代码让相机重新激素按投影矩阵值。当透视投影相机对象的.near,.far,.aspect,.fov属性变化时，都需要手动更新相机对象投影矩阵
+            }
+
+            time *= 0.001;  // 将时间单位变为s  requestAnimationFrame会将开始加载到函数运行所经历的时间当作入参传给回调函数，单位是ms
+
+            cube.rotation.x = time / 7;  // 旋转角度设为页面开始加载到函数运行所经历的时间，旋转角度是弧度制，一圈为2Π，所以立方体单方向上旋转一周的时间为6.28m
+            cube.rotation.y = time / 7;
+
+            renderer.render(scene, camera);   // 渲染场景 并调用另一个帧动画函数来继续循环
+            requestAnimationFrame(render);  // 告诉浏览器我需要显示动画。当更新了页面显示，浏览器会调用传入的参数来重新渲染页面，这里调用renderer.render来绘制场景
+        }
+        requestAnimationFrame(render);  // 开启整个渲染循环
+
+
+
+    }
+    main();
+
+</script>
+
+</html>
