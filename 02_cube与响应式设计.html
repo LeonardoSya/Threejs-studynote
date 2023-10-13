@@ -1,3 +1,11 @@
+<!--
+ * @Author: LeonardoSya 2246866774@qq.com
+ * @Date: 2023-10-10 20:07:10
+ * @LastEditors: LeonardoSya 2246866774@qq.com
+ * @LastEditTime: 2023-10-13 11:07:04
+ * @FilePath: \three.js\02_cube与响应式设计.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -44,6 +52,8 @@
         const camera = new THREE.PerspectiveCamera(fov, aspect, near, far)
 
         camera.position.z = 5;
+        // camera.lookAt(x,x,x)  // 相机镜头对准哪个坐标
+
 
         // 场景
         const scene = new THREE.Scene();
@@ -62,8 +72,8 @@
         // 平行光有一个位置和目标点，默认值均为(0,0,0)
         {
             const color = 0xffffff;
-            const intensity = 5;
-            const light = new THREE.DirectionalLight(color, intensity);
+            const intensity = 95;
+            const light = new THREE.SpotLight(color, intensity);
             light.position.set(-1, 2, 4);   // 灯光位置(此处位于摄像机左上方)
             scene.add(light);
         }
@@ -76,13 +86,14 @@
 
         // 场景和摄像机传递给渲染器
         renderer.render(scene, camera);
-
+        // .render()可以生成一个Canvas画布，并把scene呈现在canvas画布上，就像拍照“咔”
 
         //  canvas的内部尺寸，它的【分辨率】称作【绘图缓冲区尺寸】，我们应该使canvas的绘图缓冲区与canvas的显示尺寸一样
         // 这个函数检查渲染器的canvas和canvas的显示尺寸是否一样
         function resizeRendererToDisplaySize(renderer) {
-            const canvas = renderer.domElement;
-            const pixelRatio = window.devicePixelRatio;
+            const canvas = renderer.domElement;  // .domElement可以获得.render()生成的Canvas画布。因此.domElement本质上就是一个html元素：Canvas画布
+            // 可以把这个html元素(canvas画布)插入到任意html元素中  document.getElementById('xxx').appendChild(renderer.domElement)
+            const pixelRatio = window.devicePixelRatio;  // 应对HD-DPI显示器
             const width = canvas.clientWidth * pixelRatio | 0;
             const height = canvas.clientHeight * pixelRatio | 0;
             const needResize = canvas.width !== width || canvas.height !== height;
