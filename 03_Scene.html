@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=
+    , initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #sun {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+    </style>
+</head>
+
+
+<body>
+    <canvas id="sun"></canvas>
+</body>
+
+<script type="module">
+    /**
+     *  制作 Object3D 节点，并将东西作为它们的子节点 是非常重要的
+    **/
+
+
+    import * as THREE from '/three.js/build/three.module.js';
+
+    function main() {
+        // 渲染器
+        const canvas = document.querySelector('#sun');
+        const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+
+        // 机位
+        const camera = new THREE.PerspectiveCamera(35, 2, 1, 1000);
+        camera.position.set(0, 50, 0);
+        camera.up.set(0, 1, 0);  // 告诉摄像机顶部朝向哪里。一般来说正Y向上足够了，但在此我们直视下方，因此告诉摄像机正Z是向上的
+        camera.lookAt(0, 0, 0);
+
+        // 场景
+        const scene = new THREE.Scene();
+
+        // 点光源
+        {
+            const color = 0xffffff;
+            const intensity = 400;
+            const light = new THREE.PointLight(color, intensity);
+            scene.add(light);
+        }
+
+
+        // 要更新旋转角度的对象数组
+        const objects = [];
+
+        // 一球多用
+        const radius = 1;
+        const widthSegments = 20;
+        const heightSegments = 20;
+        const sphereGeometry = new THREE.SphereGeometry(radius, widthSegments, heightSegments);
+
+        // 添加一个空的场景图节点，把太阳和地球都作为该节点的子节点
+        const solarSystem = new THREE.Object3D();  // 日地轨道空间模型  // Object3D与Mesh不同的是，它没有材质material和几何体geometry，它只代表一个局部空间
+        scene.add(solarSystem);  // solarSystem空间是scene的子节点
+        objects.push(solarSystem);
+        // Sun
+        const sunMaterial = new THREE.MeshPhongMaterial({ emissive: 0xffff00 });   // emissive 放射属性  基本上不受其他光照影响的固有颜色
+        const sunMesh = new THREE.Mesh(sphereGeometry, sunMaterial);
+        sunMesh.scale.set(5, 5, 5);  // 扩大太阳的大小  因为会重用同一个球体，所以把太阳网格(sunMesh)的比例设为5x
+        solarSystem.add(sunMesh);
+        objects.push(sunMesh);
+        // Earth
+        const earthOrbit = new THREE.Object3D();  // 地球轨道
+        earthOrbit.position.x = 10;
+        solarSystem.add(earthOrbit);
+        objects.push(earthOrbit);
+        const earthMaterial = new THREE.MeshPhongMaterial({ color: 0x2233ff, emissive: 0x112244 });
+        const earthMesh = new THREE.Mesh(sphereGeometry, earthMaterial);
+        // earthMesh.position.x = 10;  // 这个偏移量已经在它父对象earthOrbit设置了
+        earthOrbit.add(earthMesh);
+        objects.push(earthMesh);
+        // 此时，earthMesh和sunMesh都是solarSystem的子网格，三者都在旋转，因为earthMesh不是sunMesh的子网格，所以不再按5倍缩放
+        // Moon
+        const moonOrbit = new THREE.Object3D();  // 月球轨道
+        moonOrbit.position.x = 2;
+        earthOrbit.add(moonOrbit);
+        const moonMaterial = new THREE.MeshPhongMaterial({ color: 0x888888, emissive: 0x222222 });
+        const moonMesh = new THREE.Mesh(sphereGeometry, moonMaterial);
+        moonMesh.scale.set(.5, .5, .5);
+        moonOrbit.add(moonMesh);
+        objects.push(moonMesh);
+
+        {/**    结构图：
+     *      Root(scene)
+     *      -----solarSystem
+     *      ---------sunMesh(5x)
+     *      ---------earthOrbit
+     *      --------------earthMesh
+     *      --------------moonOrbit
+     *      ------------------moonMesh
+    * **/}
+
+        function resizeRendererToDisplaySize(renderer) {
+            const canvas = renderer.domElement;
+            const pixelRatio = window.devicePixelRatio;
+            const width = canvas.clientWidth * pixelRatio | 0;
+            const height = canvas.clientHeight * pixelRatio | 0;
+            const needResize = canvas.width !== width || canvas.height !== height;
+            if (needResize) {
+                renderer.setSize(width, height, false)
+            }
+            return needResize;
+        }
+
+        function render(time) {
+            time *= 0.001;
+            if (resizeRendererToDisplaySize(renderer)) {
+                const canvas = renderer.domElement;
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix;
+            }
+
+            // 用这段代码旋转objects数组中的所有对象
+            objects.forEach((obj) => {
+                obj.rotation.y = time;
+            })
+            renderer.render(scene, camera);
+            requestAnimationFrame(render);
+        }
+        requestAnimationFrame(render);
+    }
+    main();
+
+
+</script>
+
+</html>
