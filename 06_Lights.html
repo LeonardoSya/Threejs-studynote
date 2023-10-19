@@ -1,0 +1,90 @@
+<!--
+ * @Author: LeonardoSya 2246866774@qq.com
+ * @Date: 2023-10-16 09:20:05
+ * @LastEditors: LeonardoSya 2246866774@qq.com
+ * @LastEditTime: 2023-10-19 15:42:38
+ * @FilePath: \three.js\04_material.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>my first three.js app</title>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+
+
+
+
+
+<body>
+
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three/build/three.module.js';
+        function main() {
+
+
+            const scene = new THREE.Scene();
+
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500);
+            camera.position.set(0, 0, 100);
+            camera.lookAt(0, 0, 0)
+
+
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            document.body.appendChild(renderer.domElement)
+
+
+            const geometry = new THREE.SphereGeometry(2, 60, 60);
+
+            const material = new THREE.MeshPhysicalMaterial({
+                color: 0x00ffff,
+                flatShading: true,
+                roughness: .3,
+                metalness: .7,
+                clearcoat: 0,
+                clearcoatRoughness: .8,
+            });
+
+            {
+                const color = 0xffffff;
+                const intensity = 45;
+                const light = new THREE.SpotLight(color, intensity);
+                light.position.set(-1, 1, 4);
+                scene.add(light);
+            }
+
+
+            const sphere = new THREE.Mesh(geometry, material);
+            scene.add(sphere);
+            camera.position.z = 5;
+
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                sphere.rotation.x += 0.01;
+                sphere.rotation.y += 0.01;
+
+                renderer.render(scene, camera);
+
+            }
+            animate();
+
+
+        }
+        main();
+    </script>
+</body>
+
+</html>

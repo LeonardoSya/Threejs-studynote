@@ -2,7 +2,7 @@
  * @Author: LeonardoSya 2246866774@qq.com
  * @Date: 2023-10-10 20:07:10
  * @LastEditors: LeonardoSya 2246866774@qq.com
- * @LastEditTime: 2023-10-13 19:31:07
+ * @LastEditTime: 2023-10-18 14:47:17
  * @FilePath: \three.js\02_cube与响应式设计.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -60,25 +60,18 @@
 
         // 纹理   
         // 创建一个TextureLoader，调用它的load方法，将材质的map属性设置为该方法的返回值 而不是color
-        const texture = new THREE.TextureLoader().load('static/pic/wall.jpg');
-        texture.colorSpace = THREE.SRGBColorSpace;
-        const material = new THREE.MeshBasicMaterial({
-            // color: ...
-            map: texture,
-        })
+        const cubes = [];   // use an array to rotate the cubes
+        const loader = new THREE.TextureLoader();
+        loader.load('static/pic/wall.jpg', (texture) => {
+            texture.colorSpace = THREE.SRGBColorSpace;
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+            });
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+            cubes.push(cube);  // add to our list of cubes to rotate
+        });
 
-        // {
-        //     const color = 0xffffff;
-        //     const intensity = 5;
-        //     const light = new THREE.DirectionalLight(color, intensity);
-        //     light.position.set(-1, 2, 4);
-        //     scene.add(light);
-        // }
-
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);   // 每当创建了一个表示物体的虚拟对象Mesh，都需要通过.add()方法，把网格模型mesh添加到三维场景scene中
-
-        renderer.render(scene, camera);
 
         function resizeRendererToDisplaySize(renderer) {
             const canvas = renderer.domElement;
@@ -94,19 +87,29 @@
 
         function render(time) {
 
+            time *= 0.001;
+
             if (resizeRendererToDisplaySize(renderer)) {
+
                 const canvas = renderer.domElement;
                 camera.aspect = canvas.clientWidth / canvas.clientHeight;
                 camera.updateProjectionMatrix();
+
             }
 
-            time *= 0.001;
+            // rotate the list of cubes
+            cubes.forEach((cube, ndx) => {
 
-            cube.rotation.x = time / 7;
-            cube.rotation.y = time / 7;
+                const speed = .2 + ndx * .1;
+                const rot = time * speed;
+                cube.rotation.x = rot;
+                cube.rotation.y = rot;
+
+            });
 
             renderer.render(scene, camera);
             requestAnimationFrame(render);
+
         }
         requestAnimationFrame(render);
 

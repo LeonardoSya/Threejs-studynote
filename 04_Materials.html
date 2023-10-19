@@ -1,0 +1,114 @@
+<!--
+ * @Author: LeonardoSya 2246866774@qq.com
+ * @Date: 2023-10-16 09:20:05
+ * @LastEditors: LeonardoSya 2246866774@qq.com
+ * @LastEditTime: 2023-10-19 15:40:29
+ * @FilePath: \three.js\04_material.html
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>my first three.js app</title>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+
+
+
+
+
+<body>
+    <h3> 材质
+        MeshBasicMaterial 不受光照影响
+        MeshLambertMaterial 只在顶点计算光照
+        MeshPhongMaterial 在每个像素计算光照 支持镜面高光
+        MeshToonMaterial 与Phong类似 但渐变图着色 类卡通
+
+        MeshStandardMaterial 有roughness(粗糙度 0-1)和metalness(金属度 0-1)属性
+        MeshPhysicalMaterial 与Standard相同 但增加clearcoat(涂抹的清漆光亮层程度)和clearcoatRoughness(光泽层粗糙度)
+
+        MeshDepthMaterial 渲染每个像素的深度
+        MeshNormalMaterial 用不同颜色显示几何体的法线
+
+
+        属性
+        emissive: 放射属性 不受光照影响的固有颜色
+        MeshPhongMaterial 的 shininess: 设置镜面高光的光泽度 默认值30
+        ShadowMaterial 获取阴影创建的数据
+
+        flatShading 对象是否使用平面着色 默认false
+        side 值为THREE.FrontSide, THREE.DoubleSide (显示正面/正反两面)
+
+    </h3>
+
+
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three/build/three.module.js';
+        function main() {
+
+
+            const scene = new THREE.Scene();
+
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 500);
+            camera.position.set(0, 0, 100);
+            camera.lookAt(0, 0, 0)
+
+
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            document.body.appendChild(renderer.domElement)
+
+
+            const geometry = new THREE.SphereGeometry(2, 60, 60);
+
+            // 材质
+            const material = new THREE.MeshNormalMaterial({
+                color: 0x00ffff,
+                flatShading: true,
+                roughness: .3,
+                metalness: .7,
+                clearcoat: 0,
+                clearcoatRoughness: .8,
+            });
+
+            {
+                const color = 0xffffff;
+                const intensity = 45;
+                const light = new THREE.SpotLight(color, intensity);
+                light.position.set(-1, 1, 4);
+                scene.add(light);
+            }
+
+
+            const sphere = new THREE.Mesh(geometry, material);
+            scene.add(sphere);
+            camera.position.z = 5;
+
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                sphere.rotation.x += 0.01;
+                sphere.rotation.y += 0.01;
+
+                renderer.render(scene, camera);
+
+            }
+            animate();
+
+
+        }
+        main();
+    </script>
+</body>
+
+</html>
