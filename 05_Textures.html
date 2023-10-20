@@ -2,7 +2,7 @@
  * @Author: LeonardoSya 2246866774@qq.com
  * @Date: 2023-10-10 20:07:10
  * @LastEditors: LeonardoSya 2246866774@qq.com
- * @LastEditTime: 2023-10-18 14:47:17
+ * @LastEditTime: 2023-10-20 16:05:23
  * @FilePath: \three.js\02_cube与响应式设计.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -35,8 +35,17 @@
     <canvas id="c"></canvas>
 </body>
 
+<script type="importmap">
+            {
+        		"imports": {
+        			"three": "../../../three.js/build/three.module.js",
+              "three/addons/": "../../../three.js/examples/jsm/"
+        		}
+        	}
+</script>
+
 <script type="module">
-    import * as THREE from '/node_modules/three/build/three.module.js';
+    import * as THREE from 'https://unpkg.com/three/build/three.module.js';
 
     function main() {
         const canvas = document.querySelector('#c');
