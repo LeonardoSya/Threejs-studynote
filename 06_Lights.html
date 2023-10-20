@@ -2,7 +2,7 @@
  * @Author: LeonardoSya 2246866774@qq.com
  * @Date: 2023-10-16 09:20:05
  * @LastEditors: LeonardoSya 2246866774@qq.com
- * @LastEditTime: 2023-10-19 15:52:10
+ * @LastEditTime: 2023-10-20 11:09:48
  * @FilePath: \three.js\04_material.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -31,7 +31,14 @@
 
 
 <body>
+
+    环境光 AmbientLight 简单的将材质的颜色和光照叠加
+    半球光 HemisphereLight 多与其他类型光照结合使用,表现天空和地面颜色照射到物体上时的效果
+    方向光 DirectionalLight 表现太阳光照的效果,是从一个无限大的平面内 发射出全部互相平行的光线
+    点光源 PointLight 一个点光源被一个圆锥体限制住了光照的范围
+
     <canvas id="c"></canvas>
+
 
     <script type="importmap">
         {
@@ -45,6 +52,7 @@
     <script type="module">
         import * as THREE from 'https://unpkg.com/three/build/three.module.js';
         import { OrbitControls } from '/three.js/examples/jsm/controls/OrbitControls.js';
+        import { GUI } from "/three.js/examples/jsm/libs/lil-gui.module.min.js";
 
         function main() {
 
@@ -69,7 +77,7 @@
             scene.background = new THREE.Color('black');
 
             {
-                const planeSize = 40;
+                const planeSize = 80;
 
                 const loader = new THREE.TextureLoader();
                 const texture = loader.load('./static/pic/checker.png');
@@ -104,8 +112,8 @@
                     flatShading: true,
                     roughness: .3,
                     metalness: .5,
-                    clearcoat:0,
-                    clearcoatRoughness:.4,
+                    clearcoat: 0,
+                    clearcoatRoughness: .4,
                 });
                 const mesh = new THREE.Mesh(cubeGeo, cubeMat);
                 mesh.position.set(cubeSize + 1, cubeSize / 2, 0);
@@ -128,17 +136,68 @@
                 mesh.position.set(-sphereRadius - 1, sphereRadius + 2, sphereRadius - 1);
                 scene.add(mesh);
             }
-
+          }
 
             // 光照
             {
-                const color = 0xffffff;
-                const intensity = 1165;
-                const light = new THREE.SpotLight(color, intensity);
-                light.position.set(12, 13, 18);
-                scene.add(light);
-            }
 
+                const color = 0xffffff;
+                const intensity = 150;
+                const light = new THREE.PointLight(color, intensity);
+                light.position.set(0, 10, 0);
+                scene.add(light);
+
+                // 半球光
+                // const skyColor = 0xb1e1ff;
+                // const groundColor = 0xb97a20;
+                // const intensity = 1;
+                // const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+                // scene.add(light);
+
+                // 方向光
+                // const color = 0xfff;
+                // const intensity = 1;
+                // const light = new THREE.DirectionalLight(color, intensity);
+                // light.position.set(0, 10, 0);
+                // light.target.position.set(-5, 0, 0);
+                // scene.add(light);
+                // scene.add(light.target);
+
+                // lib-gui
+                class ColorGUIHelper {
+                    constructor(object, prop) {
+                        this.object = object;
+                        this.prop = prop;
+                    }
+                    get value() {
+                        return `#${this.object[this.prop].getHexString()}`;
+                    }
+                    set value(hexString) {
+                        this.object[this.prop].set(hexString);
+                    }
+                }
+
+                function makeXYZGUI(gui, vector3, name, onChangeFn) {
+
+                    const folder = gui.addFolder(name);
+                    folder.add(vector3, 'x', - 20, 20).onChange(onChangeFn);
+                    folder.add(vector3, 'y', 0, 20).onChange(onChangeFn);
+                    folder.add(vector3, 'z', - 20, 20).onChange(onChangeFn);
+                    folder.open();
+
+                }
+                const gui = new GUI();
+                gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
+                gui.add(light, 'intensity', 0, 200, 0.01);
+                gui.add(light, 'distance', 0, 40).onChange(updateLight);
+                makeXYZGUI(gui, light.position, 'position', updateLight);
+                const helper = new THREE.PointLightHelper(light);
+                scene.add(helper);
+                function updateLight() {
+                    helper.update();
+                }
+
+            }
 
 
             function resizeRendererToDisplaySize(renderer) {
