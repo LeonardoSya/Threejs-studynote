@@ -1,19 +1,3 @@
-<!--
- * @Author: LeonardoSya 2246866774@qq.com
- * @Date: 2023-10-19 15:41:31
- * @LastEditors: LeonardoSya 2246866774@qq.com
- * @LastEditTime: 2023-10-23 16:27:45
- * @FilePath: \three.js\06_Lights.html
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
-<!--
- * @Author: LeonardoSya 2246866774@qq.com
- * @Date: 2023-10-16 09:20:05
- * @LastEditors: LeonardoSya 2246866774@qq.com
- * @LastEditTime: 2023-10-20 17:16:17
- * @FilePath: \three.js\04_material.html
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,16 +18,11 @@
 </head>
 
 
-
 <body>
-    <!-- 
-    环境光 AmbientLight 简单的将材质的颜色和光照叠加
-    半球光 HemisphereLight 多与其他类型光照结合使用,表现天空和地面颜色照射到物体上时的效果
-    方向光 DirectionalLight 表现太阳光照的效果,是从一个无限大的平面内 发射出全部互相平行的光线
-    点光源 PointLight 一个点朝各个方向发射光源
-    聚光灯 SpotLight 有一内一外两个圆锥,光照强度在两个锥体之间强度递减到0
-    矩形光 RectAreaLight 类似长条日光灯
- -->
+
+    渲染目标 大体上指可以被渲染的纹理 当它被渲染之后 我们可以像使用其他纹理一样使用它
+
+
     <canvas id="c"></canvas>
 
 
@@ -65,26 +44,36 @@
 
             const canvas = document.querySelector('#c');
             const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+            renderer.shadowMap.enabled = true;
 
             const objects = [];
 
 
             // 调整相机位置
-            const fov = 45;
+            const fov = 20;
             const aspect = window.innerWidth / window.innerHeight;  // canvas默认宽高 300:150
             const near = 0.1;
-            const far = 1000;
+            const far = 10000;
             const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
             camera.position.set(0, 10, 20);
+
+            // 场景
+            const scene = new THREE.Scene();
+
+            // 雾
+            {  
+                const color = 'black';
+                const density = 0.1;
+                scene.fog = new THREE.FogExp2(color, density);
+            }
 
             // 设置 OrbitControls
             const controls = new OrbitControls(camera, canvas);
             controls.target.set(0, 5, 0);
             controls.update();  // 设置完后需要更新观察点位置
 
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color('black');
 
+            // 地板
             {
                 const planeSize = 80;
 
@@ -108,9 +97,12 @@
                     side: THREE.DoubleSide,
                 });
                 const mesh = new THREE.Mesh(planeGeo, planeMat);
+                mesh.receiveShadow = true;
                 mesh.rotation.x = Math.PI * -0.5;  // 创建的平面默认在 xy 面上(竖直面)，我们需要旋转到xz面(水平面)
                 scene.add(mesh);
             }
+
+
 
             // 来个球体和立方体
             {
@@ -125,7 +117,9 @@
                     clearcoatRoughness: .4,
                 });
                 const mesh = new THREE.Mesh(cubeGeo, cubeMat);
-                mesh.position.set(cubeSize + 1, cubeSize - 1.9, cubeSize);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                mesh.position.set(cubeSize + 1, cubeSize - 2, cubeSize);
                 scene.add(mesh);
             }
             {
@@ -142,7 +136,9 @@
                     clearcoatRoughness: .8,
                 });
                 const mesh = new THREE.Mesh(sphereGeo, sphereMat);
-                mesh.position.set(-sphereRadius - 1, sphereRadius + 2, sphereRadius - 1);
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                mesh.position.set(-sphereRadius - 4, sphereRadius + 2, sphereRadius - 4);
                 scene.add(mesh);
             }
 
@@ -154,55 +150,12 @@
                 const intensity = 1000;
                 const light = new THREE.PointLight(color, intensity);
                 light.position.set(0, 35, -10);
+                // 设置光能投射阴影
+                light.castShadow = true;
+                // 减轻阴影锯齿化
+                const shadowMapSize = 2 ** 10;
+                light.shadow.mapSize.width = light.shadow.mapSize.height = shadowMapSize;
                 // scene.add(light);
-
-                // 半球光
-                // const skyColor = 0xb1e1ff;
-                // const groundColor = 0xb97a20;
-                // const intensity = 1;
-                // const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
-                // scene.add(light);
-
-                // 方向光
-                // const color = 0xfff;
-                // const intensity = 1;
-                // const light = new THREE.DirectionalLight(color, intensity);
-                // light.position.set(0, 10, 0);
-                // light.target.position.set(-5, 0, 0);
-                // scene.add(light);
-                // scene.add(light.target);
-
-                // lib-gui
-                // class ColorGUIHelper {
-                //     constructor(object, prop) {
-                //         this.object = object;
-                //         this.prop = prop;
-                //     }
-                //     get value() {
-                //         return `#${this.object[this.prop].getHexString()}`;
-                //     }
-                //     set value(hexString) {
-                //         this.object[this.prop].set(hexString);
-                //     }
-                // }
-
-                // function makeXYZGUI(gui, vector3, name, onChangeFn) {
-
-                //     const folder = gui.addFolder(name);
-                //     folder.add(vector3, 'x', - 20, 20).onChange(onChangeFn);
-                //     folder.add(vector3, 'y', 0, 20).onChange(onChangeFn);
-                //     folder.add(vector3, 'z', - 20, 20).onChange(onChangeFn);
-                //     folder.open();
-
-                // }
-                // const gui = new GUI();
-                // gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
-                // gui.add(light, 'intensity', 0, 500, 0.01);
-                // gui.add(light, 'distance', 0, 40).onChange(updateLight);
-                // makeXYZGUI(gui, light.position, 'position', updateLight);
-                // const helper = new THREE.PointLightHelper(light);
-                // scene.add(helper);
-
 
                 // 日月轨道
                 const orbitSystem = new THREE.Object3D();
@@ -239,12 +192,29 @@
                     requestAnimationFrame(render);
                 })
 
-
-                // function updateLight() {
-                //     helper.update();
-                // }
-
             }
+
+            
+            // 渲染目标
+            {
+                // WebGLRenderTarget 创建一个渲染目标
+                const rtWidth = 512;
+                const rtHeight = 512;
+                const renderTarget = new THREE.WebGLRenderTarget(rtWidth, rtHeight);
+
+                // Camera
+                const rtFov = 75;
+                const rtAspect = rtWidth / rtHeight;
+                const rtNear = .1;
+                const rtFar = 5;
+                const rtCamera = new THREE.PerspectiveCamera(rtFov, rtAspect, rtNear, rtFar);
+                rtCamera.position.z = 2;
+
+                const rtScene = new THREE.Scene();
+                rtScene.background = new THREE.Color('black');
+            }
+
+
 
             function resizeRendererToDisplaySize(renderer) {
 
@@ -293,12 +263,10 @@
             requestAnimationFrame(render);
 
 
-
-
-
         }
         main();
     </script>
+
 </body>
 
 </html>
