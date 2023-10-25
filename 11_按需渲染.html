@@ -20,11 +20,7 @@
 
 <body>
 
-    渲染目标 大体上指可以被渲染的纹理 当它被渲染之后 我们可以像使用其他纹理一样使用它
-
-
     <canvas id="c"></canvas>
-
 
     <script type="importmap">
         {
@@ -57,6 +53,7 @@
             const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
             camera.position.set(0, 10, 20);
 
+
             // 场景
             const scene = new THREE.Scene();
 
@@ -69,8 +66,10 @@
                 scene.background = new THREE.Color('black');
             }
 
-            // 设置 OrbitControls
+
+            // 设置 OrbitControls   这样当摄像机改变之后场景就可以随之渲染
             const controls = new OrbitControls(camera, canvas);
+            controls.enableDamping = true;  // 增加惯性，丝般顺滑
             controls.target.set(0, 5, 0);
             controls.update();  // 设置完后需要更新观察点位置
 
@@ -197,26 +196,6 @@
             }
 
 
-            // 渲染目标
-            // {
-            //     // WebGLRenderTarget 创建一个渲染目标
-            //     const rtWidth = 512;
-            //     const rtHeight = 512;
-            //     const renderTarget = new THREE.WebGLRenderTarget(rtWidth, rtHeight);
-
-            //     // Camera
-            //     const rtFov = 75;
-            //     const rtAspect = rtWidth / rtHeight;
-            //     const rtNear = .1;
-            //     const rtFar = 5;
-            //     const rtCamera = new THREE.PerspectiveCamera(rtFov, rtAspect, rtNear, rtFar);
-            //     rtCamera.position.z = 2;
-
-            //     const rtScene = new THREE.Scene();
-            //     rtScene.background = new THREE.Color('black');
-            // }
-
-
 
             function resizeRendererToDisplaySize(renderer) {
 
@@ -235,36 +214,56 @@
 
             }
 
+            let renderRequested = false;   // 通过一个变量来跟踪已经请求的帧
 
-            function render(time) {
-
-                time *= 0.00003;
+            // 按需渲染摄像机动画
+            function render() {
+                // time *= 0.00003;
+                renderRequested = undefined;
 
                 if (resizeRendererToDisplaySize(renderer)) {
-
                     const canvas = renderer.domElement;
                     camera.aspect = canvas.clientWidth / canvas.clientHeight;
                     camera.updateProjectionMatrix();
-
                 }
 
-
-
                 // 旋转objects
-                objects.forEach((obj) => {
-                    obj.rotation.z = time;
-                    obj.rotation.x = time / 2;
-                })
+                // objects.forEach((obj) => {
+                //     obj.rotation.z = time;
+                //     obj.rotation.x = time / 2;
+                // })
 
-
+                controls.update();
                 renderer.render(scene, camera);
-                requestAnimationFrame(render);
+            }
+            render();
 
+            // // 连续渲染月球动画
+            // function moonRender(time) {
+            //     time *= 0.00003;
+            //     objects.forEach((obj) => {
+            //         obj.rotation.z = time;
+            //         obj.rotation.x = time / 2;
+            //     })
+            //     renderer.render(scene, camera);
+            //     requestAnimationFrame(render);
+            // }
+            
+
+            function requestRenderIfNotRequested() {
+                if (!renderRequested) {
+                    renderRequested = true;
+                    requestAnimationFrame(render);
+                }
             }
 
             requestAnimationFrame(render);
 
 
+            //  在OrbitControls改变摄像机设置的时候渲染场景  这个change事件可以监听变化
+            controls.addEventListener('change', requestRenderIfNotRequested);
+            //  捕捉当用户改变窗口大小时的情况
+            window.addEventListener('resize', requestRenderIfNotRequested);
         }
         main();
     </script>

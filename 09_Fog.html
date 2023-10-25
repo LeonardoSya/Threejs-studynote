@@ -24,7 +24,7 @@
 
     FogExp2 会根据离摄像机的距离呈指数增长
 
-    fog材料上有个boolean属性, 用来设置渲染物体的材料是否会收到雾的影响, 默认true
+    mesh的material上有个boolean属性, 用来设置渲染物体的材料是否会收到雾的影响, 默认true   material.fog: true;
 
     <canvas id="c"></canvas>
 
@@ -60,26 +60,30 @@
             const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
             camera.position.set(0, 10, 20);
 
-            // 场景
-            const scene = new THREE.Scene();
-
-            // 雾
-            {  // fog更常用
-                //     const color = 'black';
-                //     const near = 10;
-                //     const far = 20;
-                //     scene.fog = new THREE.Fog(color, near, far);
-                //     scene.background = new THREE.Color('black');
-            }
-            {  // fogExp更真实
-                const color = 'black';
-                const density = 0.1;
-                scene.fog = new THREE.FogExp2(color, density);
-            }
 
             // 设置 OrbitControls
             const controls = new OrbitControls(camera, canvas);
             controls.target.set(0, 5, 0);
+
+            // 场景
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color('black');
+
+
+            // 雾
+            {  // fog更常用
+                const color = 'black';
+                const near = 10;
+                const far = 250;
+                scene.fog = new THREE.Fog(color, near, far);
+                scene.background = new THREE.Color('black');
+            }
+            {  // fogExp更真实
+                // const color = 'black';
+                // const density = 0.1;
+                // scene.fog = new THREE.FogExp2(color, density);
+            }
+
             controls.update();  // 设置完后需要更新观察点位置
 
 
@@ -167,54 +171,6 @@
                 light.shadow.mapSize.width = light.shadow.mapSize.height = shadowMapSize;
                 // scene.add(light);
 
-                // 半球光
-                // const skyColor = 0xb1e1ff;
-                // const groundColor = 0xb97a20;
-                // const intensity = 1;
-                // const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
-                // scene.add(light);
-
-                // 方向光
-                // const color = 0xfff;
-                // const intensity = 1;
-                // const light = new THREE.DirectionalLight(color, intensity);
-                // light.position.set(0, 10, 0);
-                // light.target.position.set(-5, 0, 0);
-                // scene.add(light);
-                // scene.add(light.target);
-
-                // lib-gui
-                // class ColorGUIHelper {
-                //     constructor(object, prop) {
-                //         this.object = object;
-                //         this.prop = prop;
-                //     }
-                //     get value() {
-                //         return `#${this.object[this.prop].getHexString()}`;
-                //     }
-                //     set value(hexString) {
-                //         this.object[this.prop].set(hexString);
-                //     }
-                // }
-
-                // function makeXYZGUI(gui, vector3, name, onChangeFn) {
-
-                //     const folder = gui.addFolder(name);
-                //     folder.add(vector3, 'x', - 20, 20).onChange(onChangeFn);
-                //     folder.add(vector3, 'y', 0, 20).onChange(onChangeFn);
-                //     folder.add(vector3, 'z', - 20, 20).onChange(onChangeFn);
-                //     folder.open();
-
-                // }
-                // const gui = new GUI();
-                // gui.addColor(new ColorGUIHelper(light, 'color'), 'value').name('color');
-                // gui.add(light, 'intensity', 0, 500, 0.01);
-                // gui.add(light, 'distance', 0, 40).onChange(updateLight);
-                // makeXYZGUI(gui, light.position, 'position', updateLight);
-                // const helper = new THREE.PointLightHelper(light);
-                // scene.add(helper);
-
-
                 // 日月轨道
                 const orbitSystem = new THREE.Object3D();
                 scene.add(orbitSystem);
@@ -232,7 +188,7 @@
                 const loader = new THREE.TextureLoader();
                 loader.load('static/pic/moon.jpg', (texture) => {
                     texture.colorSpace = THREE.SRGBColorSpace;
-                    const moonMat = new THREE.MeshBasicMaterial({ map: texture });
+                    const moonMat = new THREE.MeshBasicMaterial({ map: texture, fog: false });  // 在材质上定义不可着雾
                     const moon = new THREE.Mesh(moonGeo, moonMat);
                     moon.position.set(0, 35, -10);
                     orbitSystem.add(moon);

@@ -7,8 +7,8 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Open 05_纹理.html",
-            "file": "d:\\桌面\\three.js\\05_纹理.html"
+            "name": "Open 10_Render Targets.html",
+            "file": "d:\\桌面\\three.js\\10_Render Targets.html"
         }
     ]
 }
