@@ -15,29 +15,18 @@
             height: 100%;
         }
 
-        /* #debug {
-            position: absolute;
-            left: 1em;
-            top: 1em;
-            padding: 1em;
-            background: rgba(0, 0, 0, .3);
-            color: white;
-            font-family: monospace;
-        } */
+        canvas:focus {
+            outline: none;
+        }
     </style>
 </head>
 
 
 <body>
 
-    <!-- 按需渲染不像是连续渲染那么常见, 因为3D游戏或者艺术创作中必须要让场景动出来.
-    但是有些场合, 例如地图浏览器, 3D编辑器, 3D图产生器等等的, 可能还是按需渲染比较好. -->
 
-    <canvas id="c"></canvas>
-    <!-- <div id="debug">
-        <pre></pre>
-    </div> -->
 
+    <canvas id="c" tabindex="0"></canvas>
 
     <script type="importmap">
         {
@@ -69,6 +58,9 @@
             const far = 10000;
             const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
             camera.position.set(0, 10, 20);
+            
+            // move
+            
 
 
             // 场景
@@ -278,35 +270,6 @@
                 requestAnimationFrame(animateMoon);
             }
             animateMoon();
-
-
-            // // 展示月球运动坐标和fps
-            // class ClearingLogger {
-            //     constructor(elem) {
-            //         this.elem = elem;
-            //         this.lines = [];
-            //     }
-            //     log(...args) {
-            //         this.lines.push([...args].join(' '));
-            //     }
-            //     render() {
-            //         this.elem.textContent = this.lines.join('\n');
-            //         this.lines = [];
-            //     }
-            // }
-            // const logger = new ClearingLogger(document.querySelector('#debug pre'));
-            // let then = 0;
-            // function renderFps(now) {
-            //     now *= 0.001;
-            //     let deltaTime = now - then;
-            //     then = now;
-
-            //     logger.log('fps:', (1 / deltaTime).toFixed(1));
-            // }
-            // renderer.render(scene, camera);
-            // renderFps();
-
-
 
             function requestRenderIfNotRequested() {
                 if (!renderRequested) {
