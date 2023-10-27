@@ -1,8 +1,8 @@
 
 import * as THREE from '../three.js/build/three.module';
+import { init, state } from './shared-cubes.js';
 
 // 因为Worker看不见dom结构，所以需要重新设定canvas.clientWidth和Height
-const state = { width: 300, height: 150 };
 
 
 function main(data) {
@@ -118,7 +118,7 @@ function size(data) {
 
 
 const handlers = {
-    main,
+    init,
     size,
 };
 
