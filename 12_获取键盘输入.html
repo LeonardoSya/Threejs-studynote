@@ -58,9 +58,17 @@
             const far = 10000;
             const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
             camera.position.set(0, 10, 20);
-            
+
             // move
-            
+            const keys = {};
+            document.addEventListener('keydown', (e) => { keys[e.key] = true });
+            document.addEventListener('keyup', (e) => { keys[e.key] = false });
+            function updateCamera() {
+                if (keys['w']) camera.position.z -= .3;
+                if (keys['s']) camera.position.z += .3;
+                if (keys['a']) camera.position.x -= .3;
+                if (keys['d']) camera.position.x += .3;
+            }
 
 
             // 场景
@@ -237,6 +245,7 @@
 
                 controls.update();
                 renderer.render(scene, camera);
+                // onCodeMove();
             }
             render();
 
@@ -266,8 +275,10 @@
                     obj.rotation.z = time;
                     obj.rotation.x = time / 2;
                 })
-                rendererMoon.render(scene, camera);
                 requestAnimationFrame(animateMoon);
+                updateCamera();
+                rendererMoon.render(scene, camera);
+
             }
             animateMoon();
 

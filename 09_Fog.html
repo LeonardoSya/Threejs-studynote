@@ -24,7 +24,7 @@
 
     FogExp2 会根据离摄像机的距离呈指数增长
 
-    mesh的material上有个boolean属性, 用来设置渲染物体的材料是否会收到雾的影响, 默认true   material.fog: true;
+    mesh的material上有个boolean属性, 用来设置渲染物体的材料是否会收到雾的影响, 默认true material.fog: true;
 
     <canvas id="c"></canvas>
 
@@ -53,12 +53,12 @@
 
 
             // 调整相机位置
-            const fov = 20;
+            const fov = 40;
             const aspect = window.innerWidth / window.innerHeight;  // canvas默认宽高 300:150
             const near = 0.1;
             const far = 10000;
             const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-            camera.position.set(0, 10, 20);
+            camera.position.set(0, 1, 20);
 
 
             // 设置 OrbitControls
@@ -69,6 +69,18 @@
             const scene = new THREE.Scene();
             scene.background = new THREE.Color('black');
 
+
+
+            // move
+            const keys = {};
+            document.addEventListener('keydown', (e) => { keys[e.key] = true });
+            document.addEventListener('keyup', (e) => { keys[e.key] = false });
+            function updateCamera() {
+                if (keys['w']) camera.position.z -= .3;
+                if (keys['s']) camera.position.z += .3;
+                if (keys['a']) camera.position.x -= .3;
+                if (keys['d']) camera.position.x += .3;
+            }
 
             // 雾
             {  // fog更常用
@@ -253,6 +265,7 @@
                 })
 
 
+                updateCamera();
                 renderer.render(scene, camera);
                 requestAnimationFrame(render);
 

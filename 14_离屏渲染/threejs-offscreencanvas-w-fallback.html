@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OffscreenCanvas</title>
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #c {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        canvas:focus {
+            outline: none;
+        }
+
+        #noOffscreenCanvas {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            background: red;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="c"></canvas>
+
+    <div id="noOffscreenCanvas" style="display:none;">
+        <div>no OffscreenCanvas support</div>
+    </div>
+
+
+    OffscreenCanvas 允许使用 Web Worker 渲染画布 从而避免减慢浏览器的响应速度和减少卡顿
+
+
+
+    <script type="module">
+
+
+        function main() {
+            const canvas = document.querySelector('#c');
+            // 检查浏览器对OffscreenCanvas的兼容性
+            if (!canvas.transferControlToOffscrenn) {
+                canvas.style.display = 'none';
+                document.querySelector('#noOffscreenCanvas').style.display = '';
+                return;
+            }
+            const offscreen = canvas.transferControlToOffscreen();
+            // 启用 Worker
+            const worker = new Worker('offscreencanvas-cubes.js', { type: 'module' });
+            worker.postMessage({ type: 'main', canvas: offscreen }, [offscreen]);
+        }
+        main();
+
+        // 注意，Worker不能访问DOM，不能查看html元素也不能接受键鼠事件。 它们唯一能做的事情是响应消息并将消息发送回主页面
+        // 发送消息给Worker，需要调用 worker.postMessage
+        // Worker从onmessage方法获取消息
+        // 只是根据从主页面传入的data中的type查找处理函数
+
+        // 任何页面尺寸发生变化的时候，我们都需要发送一个size事件
+        function sendSize() {
+            worker.postMessage({
+                type: 'size',
+                width: canvas.clientWidth,
+                height: canvas.clientHeight,
+            });
+        }
+        window.addEventListener('resize', sendSize);
+        sendSize();
+    </script>
+
+</body>
+
+</html>
