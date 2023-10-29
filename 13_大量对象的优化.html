@@ -2,10 +2,11 @@
  * @Author: LeonardoSya 2246866774@qq.com
  * @Date: 2023-10-26 20:31:12
  * @LastEditors: LeonardoSya 2246866774@qq.com
- * @LastEditTime: 2023-10-26 20:33:01
+ * @LastEditTime: 2023-10-29 10:35:04
  * @FilePath: \three.js\13_大量对象的优化.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,14 +18,28 @@
 
 <body>
 
-    大量对象的优化: 合并几何体
-    每个创建的Mesh代表一个请求系统渲染的命令 将这堆mesh合并起来
+    <!-- 大量对象的优化: 合并几何体
+    每个创建的Mesh代表一个请求系统渲染的命令 将这堆mesh合并起来 -->
 
     <script>
 
+        // 载入数据
         async function loadFile(url) {
             const res = await fetch(url);
-            return res.text();
+            return res.text();   // 返回文件内容的 Promise
+        }
+
+        // 解析文件内容
+        function parseData(text) {
+            const data = [];
+            const settings = { data };
+            let max, min;
+
+            // 对每一行进行切分
+            text.split('\n').forEach((line)=> {
+                // split the line by whitespace
+                const parts=line.trim().split(/\s+/);
+            })
         }
     </script>
 </body>

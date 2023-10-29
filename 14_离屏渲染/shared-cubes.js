@@ -1,12 +1,9 @@
-
-import * as THREE from '../three.js/build/three.module';
+import * as THREE from '../three.js/build/three.module.js';
 
 // 因为Worker看不见dom结构，所以需要重新设定canvas.clientWidth和Height
 export const state = { width: 300, height: 150 };
 
-
 export function init(data) {
-
     // 不从dom中获取画布，而是从事件数据中获取它
     // const canvas = document.querySelector( '#c' );
     const { canvas } = data;
@@ -15,12 +12,12 @@ export function init(data) {
     state.width = canvas.width;
     state.height = canvas.height;
 
-    const fov = 75;
+    const fov = 55;
     const aspect = 2; // the canvas default
     const near = 0.1;
-    const far = 5;
+    const far = 15;
     const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    camera.position.z = 2;
+    camera.position.z = 8;
 
     const scene = new THREE.Scene();
 
@@ -29,7 +26,7 @@ export function init(data) {
         const color = 0xFFFFFF;
         const intensity = 3;
         const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(- 1, 2, 4);
+        light.position.set(-1, 2, 4);
         scene.add(light);
 
     }
@@ -54,7 +51,7 @@ export function init(data) {
 
     const cubes = [
         makeInstance(geometry, 0x44aa88, 0),
-        makeInstance(geometry, 0x8844aa, - 2),
+        makeInstance(geometry, 0x8844aa, -2),
         makeInstance(geometry, 0xaa8844, 2),
     ];
 
@@ -111,5 +108,4 @@ export function init(data) {
 
 
 
-// main();
 

@@ -47,40 +47,22 @@
 
 
 
-    <script type="module">
-        import { init, state } from './shared-cubes.js';
+    <script type="module">        import { init, state } from './shared-cubes.js';
 
-
-        function main() {
-            const canvas = document.querySelector('#c');
-            // 检查浏览器对OffscreenCanvas的兼容性
-            // if (!canvas.transferControlToOffscrenn) {
-            //     canvas.style.display = 'none';
-            //     document.querySelector('#noOffscreenCanvas').style.display = '';
-            //     return;
-            // }
-            //     const offscreen = canvas.transferControlToOffscreen();
-            //     // 启用 Worker
-            //     const worker = new Worker('offscreencanvas-cubes.js', { type: 'module' });
-            //     worker.postMessage({ type: 'main', canvas: offscreen }, [offscreen]);
-            // }
-
-            // 以上 改成调用一次启动函数 启动函数取决于浏览器是否支持OffscreenCanvas
-            if (canvas.transferControlToOffscreen) {
-                startWorker(canvas);
-            } else {
-                startMainPage(canvas);
-            }
-            function startWorker(canvas) {
-                const offscreen=canvas.transferControlToOffscreen();
-                const worker=new Worker('offscreencanvas-worker-cubes.js')
-            }
-            main();
+        // 从worker启动
+        function startWorker(canvas) {
+            // 调用 canvas.transferControlToOffscreen 使画布脱离屏幕
+            const offscreen = canvas.transferControlToOffscreen();
 
             // 注意，Worker不能访问DOM，不能查看html元素也不能接受键鼠事件。 它们唯一能做的事情是响应消息并将消息发送回主页面
             // 发送消息给Worker，需要调用 worker.postMessage
             // Worker从onmessage方法获取消息
             // 只是根据从主页面传入的data中的type查找处理函数
+
+            const worker = new Worker('./offscreencanvas-cubes.js', { type: 'module' });  // 参数1：js对象被结构化拷贝并发送给worker 参数2：可选的对象数组
+            worker.postMessage({
+                type: 'init', canvas: offscreen
+            }, [offscreen]);
 
             // 任何页面尺寸发生变化的时候，我们都需要发送一个size事件
             function sendSize() {
@@ -90,8 +72,39 @@
                     height: canvas.clientHeight,
                 });
             }
+
             window.addEventListener('resize', sendSize);
             sendSize();
+
+            console.log('using OffscreenCanvas');
+        }
+
+        // 从主页面启动
+        function startMainPage(canvas) {
+            init({ canvas });
+
+            function sendSize() {
+                state.width = canvas.clientWidth;
+                state.height = canvas.clientHeight;
+            }
+            window.addEventListener('resize', sendSize);
+            sendSize();
+            console.log('using regular canvas');
+        }
+
+
+        function main() {
+            const canvas = document.querySelector('#c');
+            // 检查浏览器对OffscreenCanvas的兼容性
+            // 调用一次启动函数 启动函数取决于浏览器是否支持OffscreenCanvas
+            if (canvas.transferControlToOffscreen) {
+                startWorker(canvas);
+            } else {
+                startMainPage(canvas);
+            }
+        }
+        main();
+
     </script>
 
 </body>
