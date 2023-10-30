@@ -2,7 +2,7 @@
  * @Author: LeonardoSya 2246866774@qq.com
  * @Date: 2023-10-26 20:31:12
  * @LastEditors: LeonardoSya 2246866774@qq.com
- * @LastEditTime: 2023-10-29 10:35:04
+ * @LastEditTime: 2023-10-30 10:45:39
  * @FilePath: \three.js\13_大量对象的优化.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -21,7 +21,10 @@
     <!-- 大量对象的优化: 合并几何体
     每个创建的Mesh代表一个请求系统渲染的命令 将这堆mesh合并起来 -->
 
+    <canvas id="c"></canvas>
+
     <script>
+
 
         // 载入数据
         async function loadFile(url) {
@@ -31,14 +34,61 @@
 
         // 解析文件内容
         function parseData(text) {
-            const data = [];
+            const data = [];  // 存储网格数据
             const settings = { data };
-            let max, min;
-
+            let max, min;  // data中的极值
             // 对每一行进行切分
-            text.split('\n').forEach((line)=> {
+            text.split('\n').forEach((line) => {
                 // split the line by whitespace
-                const parts=line.trim().split(/\s+/);
+                const parts = line.trim().split(/\s+/);   // 每个parts是单行中所有值组成的一维数组
+                if (parts.length == 2) {
+                    // 长度为2的必是键值对
+                    settings[parts[0]] = parseFloat(parts[1]);
+                } else if (parts.length > 2) {
+                    // 长度超过2的必是网格数据
+                    const values = parts.map((v) => {
+                        const value = parseFloat(v);
+                        if (value === settings.NODATA_value) {
+                            return undefined;
+                        }
+                        max = Math.max(max === undefined ? value : max, value);
+                        min = Math.min(min === undefined ? value : min, value);
+                        return value;
+                    });
+                    data.push(values);
+                }
+            });
+            return Object.assign(settings, { min, max });
+        }
+
+
+        // 绘图函数
+        function drawData(file) {
+            const { min, max, data } = file;
+            const range = max - min;
+            const ctx = document.querySelector('canvas').getContext('2d');
+            // 新建一个和网格数据尺寸相等的canvas
+            ctx.canvas.width = ncols;
+            ctx.canvas.height = nrows;
+            // 但是以两倍大小绘制防止太小
+            ctx.canvas.style.width = px(ncol * 2);
+            ctx.canvas.style.height = px(nrows * 2);
+            // 用黑灰色填充
+            ctx.fillStyle = '#444';
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            // 绘制数据点
+            data.forEach((row, latNdx) => {
+                row.forEach((value, lonNdx) => {
+                    if (value === undefined) {
+                        return;
+                    }
+                    const amount = (value - min) / range;
+                    const hue = 1;
+                    const saturation = 1;
+                    const light = amount;
+                    ctx.fillStyle = hsl(hue, saturation, lightness);
+                    ctx.fillRect(lonNdx, latNdx, 1, 1);
+                });
             })
         }
     </script>
