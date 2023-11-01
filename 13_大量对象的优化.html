@@ -2,7 +2,7 @@
  * @Author: LeonardoSya 2246866774@qq.com
  * @Date: 2023-10-26 20:31:12
  * @LastEditors: LeonardoSya 2246866774@qq.com
- * @LastEditTime: 2023-10-31 08:28:46
+ * @LastEditTime: 2023-11-01 21:18:13
  * @FilePath: \three.js\13_大量对象的优化.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -79,7 +79,7 @@
                 const loader = new THREE.TextureLoader();
                 const texture = loader.load('./static/pic/world_color.webp', render);
                 const geometry = new THREE.SphereGeometry(1, 64, 32);
-                const material = new THREE.MeshPhongMaterial(({ map: texture }));
+                const material = new THREE.MeshBasicMaterial(({ map: texture }));
                 scene.add(new THREE.Mesh(geometry, material));
             }
 
@@ -98,11 +98,14 @@
             }
 
 
+
             // 载入数据
             async function loadFile(url) {
                 const res = await fetch(url);
                 return res.text();   // 返回文件内容的 Promise
             }
+
+
 
             // 解析文件内容
             function parseData(text) {
